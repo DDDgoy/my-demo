@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小谢螺蛳粉 · 管理系统</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+:root{
+  --red:#E8341A;--red-dark:#C02A12;--orange:#F5A623;
+  --cream:#FFF8F0;--dark:#1A0A00;--mid:#6B3A1F;--light:#F9EFE4;
+  --green:#2D7A3A;--green-light:#E8F5EA;--blue:#1976D2;--blue-light:#E3F2FD;
+  --purple:#7B1FA2;--purple-light:#F3E5F5;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans SC',sans-serif;background:#0f0f0f;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px;gap:14px;}
+h1.title{color:#fff;font-size:18px;font-weight:700;letter-spacing:2px;text-align:center;padding-top:8px;}
+.subtitle{color:#666;font-size:11px;text-align:center;}
+
+/* ── PHONE FRAME ── */
+.phones-row{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.phone-label{color:#555;font-size:10px;letter-spacing:1px;text-transform:uppercase;}
+.phone{width:360px;height:730px;background:var(--cream);border-radius:38px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,0.7),0 0 0 2px #2a2a2a;position:relative;display:flex;flex-direction:column;}
+
+/* ── TOP TAB BAR ── */
+.tab-bar{display:flex;background:#1a1a1a;border-radius:50px;padding:4px;gap:4px;}
+.tab-btn{padding:8px 18px;border-radius:50px;border:none;font-family:'Noto Sans SC',sans-serif;
+  font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;color:#666;background:transparent;}
+.tab-btn.active{background:var(--red);color:#fff;}
+
+/* ── HEADERS ── */
+.c-header{background:var(--red);padding:34px 18px 13px;position:relative;overflow:hidden;flex-shrink:0;}
+.c-header::before{content:'🍜';position:absolute;right:-8px;top:8px;font-size:68px;opacity:0.14;}
+.c-header .shop-name{font-size:16px;font-weight:900;color:#fff;}
+.c-header .shop-sub{font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px;}
+.c-header .table-tag{display:inline-block;background:rgba(255,255,255,0.18);color:#fff;font-size:10px;padding:2px 9px;border-radius:16px;margin-top:5px;}
+.m-header{background:var(--dark);padding:32px 18px 12px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.m-title{font-size:15px;font-weight:700;color:#fff;}
+.m-sub{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;}
+
+/* ── CAT TABS ── */
+.cat-tabs{display:flex;gap:5px;padding:9px 13px;background:#fff;overflow-x:auto;
+  border-bottom:1px solid #f0e8e0;flex-shrink:0;scrollbar-width:none;}
+.cat-tab{padding:4px 12px;border-radius:16px;font-size:12px;font-weight:500;white-space:nowrap;
+  cursor:pointer;transition:all 0.15s;background:var(--light);color:var(--mid);}
+.cat-tab.active{background:var(--red);color:#fff;}
+
+/* ── MENU ITEMS ── */
+.menu-list{flex:1;overflow-y:auto;padding:10px 12px;scrollbar-width:none;background:var(--cream);}
+.menu-section-title{font-size:10px;color:#bbb;font-weight:600;margin:5px 0 7px;letter-spacing:1px;}
+.menu-item{background:#fff;border-radius:14px;padding:11px;margin-bottom:9px;display:flex;gap:10px;
+  align-items:center;box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;transition:transform 0.12s;}
+.menu-item:active{transform:scale(0.98);}
+.menu-item.soldout-item{opacity:0.5;cursor:default;}
+.item-emoji{font-size:30px;width:42px;text-align:center;flex-shrink:0;}
+.item-info{flex:1;min-width:0;}
+.item-name{font-size:14px;font-weight:700;color:var(--dark);}
+.item-desc{font-size:10px;color:#bbb;margin-top:1px;line-height:1.4;}
+.item-small{font-size:9px;color:#ccc;margin-top:2px;font-style:italic;}
+.item-tags{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;}
+.item-tag{font-size:9px;padding:1px 5px;border-radius:3px;background:#FFF3CD;color:#856404;}
+.item-tag.hot{background:#FFE4E0;color:var(--red);}
+.item-price-add{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.item-price{font-size:15px;font-weight:700;color:var(--red);}
+.item-price.soldout{color:#bbb;text-decoration:line-through;font-size:12px;}
+.soldout-badge{font-size:9px;background:#f0f0f0;color:#aaa;padding:2px 7px;border-radius:8px;font-weight:600;}
+.add-btn{width:26px;height:26px;border-radius:50%;background:var(--red);color:#fff;border:none;
+  font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* ── CART BAR ── */
+.cart-bar{background:var(--dark);margin:8px 12px 12px;border-radius:14px;padding:12px 15px;
+  display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0;transition:opacity 0.2s;}
+.cart-bar.empty{opacity:0.35;cursor:default;}
+.cart-icon{font-size:20px;position:relative;}
+.cart-badge{position:absolute;top:-5px;right:-7px;background:var(--orange);color:#fff;
+  font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;}
+.cart-text{flex:1;color:#fff;font-size:13px;font-weight:500;}
+.cart-total{color:var(--orange);font-size:17px;font-weight:700;}
+
+/* ── OVERLAY SYSTEM ── */
+.ov{position:absolute;inset:0;background:rgba(0,0,0,0.52);display:flex;align-items:flex-end;
+  z-index:10;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.ov.show{opacity:1;pointer-events:all;}
+.ov.center{align-items:center;justify-content:center;padding:16px;}
+.sheet{background:#fff;border-radius:22px 22px 0 0;width:100%;max-height:92%;
+  overflow-y:auto;padding-bottom:18px;transform:translateY(28px);transition:transform 0.28s;scrollbar-width:none;}
+.ov.show .sheet{transform:translateY(0);}
+.sheet-hd{padding:16px 16px 11px;border-bottom:1px solid #f5f5f5;display:flex;
+  justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1;}
+.sheet-title{font-size:15px;font-weight:700;color:var(--dark);}
+.close-btn{background:#f0f0f0;border:none;width:26px;height:26px;border-radius:50%;
+  font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ── CUSTOMIZE MODAL ── */
+.opt-grp{padding:11px 16px 0;}
+.opt-title{font-size:12px;font-weight:700;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.req-tag{font-size:9px;background:#FFE4E0;color:var(--red);padding:1px 5px;border-radius:3px;}
+.opt-tag{font-size:9px;color:#bbb;}
+.opt-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{padding:5px 11px;border-radius:16px;border:1.5px solid #e8e8e8;font-size:11px;cursor:pointer;
+  transition:all 0.12s;color:#555;background:#fff;white-space:nowrap;user-select:none;}
+.chip.sel{border-color:var(--red);background:#FFF0EE;color:var(--red);font-weight:600;}
+.chip.multi.sel{border-color:var(--green);background:var(--green-light);color:var(--green);}
+.chip.combo.sel{border-color:var(--orange);background:#FFF8ED;color:var(--orange);font-weight:600;}
+.chip.disabled{border-color:#f0f0f0;background:#fafafa;color:#ccc;cursor:not-allowed;pointer-events:none;}
+
+/* ── TOPPING GRID (with qty) ── */
+.topping-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.top-item{padding:8px 10px;border-radius:10px;border:1.5px solid #e8e8e8;transition:all 0.12s;
+  display:flex;justify-content:space-between;align-items:center;gap:6px;}
+.top-item.has-qty{border-color:var(--orange);background:#FFF8ED;}
+.top-name{font-size:11px;color:var(--dark);flex:1;}
+.top-right{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.top-price{font-size:10px;color:var(--orange);font-weight:600;}
+.top-qty-ctrl{display:flex;align-items:center;gap:3px;}
+.tqb{width:20px;height:20px;border-radius:50%;border:1.5px solid;font-size:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;background:#fff;line-height:1;font-weight:700;}
+.tqb.minus{border-color:var(--red);color:var(--red);}
+.tqb.plus{background:var(--orange);border-color:var(--orange);color:#fff;}
+.tqb.plus-only{background:var(--orange);border-color:var(--orange);color:#fff;}
+.tqb-num{font-size:12px;font-weight:700;color:var(--dark);min-width:14px;text-align:center;}
+
+.note-input{width:100%;border:1.5px solid #e8e8e8;border-radius:10px;padding:9px 11px;
+  font-family:'Noto Sans SC',sans-serif;font-size:12px;resize:none;outline:none;color:var(--dark);}
+.note-input:focus{border-color:var(--red);}
+.note-counter{font-size:10px;color:#bbb;text-align:right;margin-top:3px;}
+.confirm-btn{margin:14px 16px 0;width:calc(100% - 32px);background:var(--red);color:#fff;
+  border:none;border-radius:12px;padding:14px;font-family:'Noto Sans SC',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;}
+
+/* ── CART SHEET ── */
+.csi{display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid #f5f5f5;}
+.csi:last-child{border-bottom:none;}
+.csi-info{flex:1;}
+.csi-name{font-size:13px;font-weight:700;color:var(--dark);}
+.csi-spec{font-size:9px;color:#bbb;margin-top:2px;line-height:1.5;}
+.csi-price{font-size:13px;font-weight:700;color:var(--red);flex-shrink:0;margin-right:8px;}
+.qty-ctrl{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.qb{width:24px;height:24px;border-radius:50%;border:1.5px solid;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1;}
+.qb.minus{border-color:var(--red);color:var(--red);background:#fff;}
+.qb.plus{background:var(--red);border-color:var(--red);color:#fff;}
+.qb-num{font-size:14px;font-weight:700;color:var(--dark);min-width:14px;text-align:center;}
+.cart-total-row{display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px;border-top:2px solid #f5f5f5;background:#fff;position:sticky;bottom:0;}
+.submit-btn{margin:10px 16px 0;width:calc(100% - 32px);background:var(--red);color:#fff;
+  border:none;border-radius:12px;padding:14px;font-family:'Noto Sans SC',sans-serif;
+  font-size:15px;font-weight:700;cursor:pointer;}
+
+/* ── CUSTOMER ORDER STATUS ── */
+.os-hd{flex-shrink:0;padding:34px 18px 20px;color:#fff;position:relative;overflow:hidden;}
+.os-hd.making{background:linear-gradient(135deg,var(--red),var(--red-dark));}
+.os-hd.ready{background:linear-gradient(135deg,var(--green),#1a5c27);}
+.os-hd.paid{background:linear-gradient(135deg,#555,#333);}
+.os-hd::before{content:'🍜';position:absolute;right:-8px;top:8px;font-size:76px;opacity:0.1;}
+.os-num-label{font-size:10px;opacity:0.7;margin-bottom:4px;}
+.os-big-num{font-size:54px;font-weight:900;line-height:1;letter-spacing:-2px;}
+.os-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.18);
+  padding:4px 12px;border-radius:16px;font-size:12px;font-weight:600;margin-top:8px;}
+.os-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
+.os-body{flex:1;overflow-y:auto;background:var(--cream);padding:12px;scrollbar-width:none;}
+.os-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:9px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.os-card-title{font-size:11px;color:#999;margin-bottom:11px;font-weight:600;}
+.os-step{display:flex;gap:11px;align-items:flex-start;}
+.os-step-left{display:flex;flex-direction:column;align-items:center;}
+.os-circle{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.os-circle.done{background:var(--green);color:#fff;}
+.os-circle.active{background:var(--red);color:#fff;}
+.os-circle.pending{background:#f0f0f0;color:#ccc;}
+.os-line{width:2px;height:20px;background:#f0f0f0;margin:2px 0;}
+.os-line.done{background:var(--green);}
+.os-step-info{padding-top:2px;flex:1;padding-bottom:14px;}
+.os-step-name{font-size:12px;font-weight:600;color:var(--dark);}
+.os-step-sub{font-size:10px;color:#999;margin-top:1px;}
+.pay-prompt{background:linear-gradient(135deg,var(--green),#1a5c27);border-radius:14px;
+  padding:16px;color:#fff;text-align:center;margin-bottom:9px;}
+.pp-title{font-size:13px;font-weight:700;margin-bottom:5px;}
+.pp-price{font-size:42px;font-weight:900;letter-spacing:-1px;}
+.pp-sub{font-size:10px;opacity:0.75;margin-top:5px;}
+
+/* ── MERCHANT NAV ── */
+.m-nav{display:flex;background:#fff;border-bottom:1px solid #f0f0f0;flex-shrink:0;}
+.m-nav-btn{flex:1;padding:10px;border:none;background:transparent;
+  font-family:'Noto Sans SC',sans-serif;font-size:11px;font-weight:500;cursor:pointer;
+  color:#999;border-bottom:2px solid transparent;transition:all 0.15s;}
+.m-nav-btn.active{color:var(--red);border-bottom-color:var(--red);}
+.m-content{flex:1;overflow-y:auto;background:#f5f1ed;scrollbar-width:none;}
+
+/* ── ORDER CARDS (merchant) ── */
+.orders-panel{padding:11px;}
+.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.sec-title{font-size:12px;font-weight:700;color:var(--dark);}
+.sec-badge{background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;}
+.mc{background:#fff;border-radius:14px;margin-bottom:9px;box-shadow:0 2px 6px rgba(0,0,0,0.05);overflow:hidden;}
+.mc-top{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 13px 8px;cursor:pointer;}
+.mc-left{display:flex;flex-direction:column;}
+.mc-num{font-size:26px;font-weight:900;color:var(--dark);line-height:1;}
+.mc-time{font-size:9px;color:#bbb;margin-top:1px;}
+.mc-right{text-align:right;}
+.mc-price{font-size:24px;font-weight:900;color:var(--red);line-height:1;}
+.mc-badge{display:inline-block;font-size:9px;font-weight:600;padding:2px 8px;border-radius:12px;margin-top:3px;}
+.mc-badge.new{background:#FFE4E0;color:var(--red);}
+.mc-badge.making{background:#FFF3CD;color:#856404;}
+.mc-badge.ready{background:var(--green-light);color:var(--green);}
+.mc-badge.paid{background:#f0f0f0;color:#999;}
+.mc-preview{font-size:10px;color:#888;padding:0 13px 8px;line-height:1.6;}
+.mc-detail{padding:0 13px 10px;border-top:1px solid #f5f5f5;display:none;}
+.mc-detail.open{display:block;}
+.mc-detail-title{font-size:9px;color:#bbb;font-weight:600;letter-spacing:0.5px;margin:9px 0 6px;}
+/* PRINT RECEIPT STYLE inside detail */
+.receipt{background:#fafafa;border-radius:10px;padding:10px 12px;font-size:11px;line-height:1.8;}
+.receipt-line{display:flex;justify-content:space-between;border-bottom:1px dashed #e8e8e8;padding:3px 0;}
+.receipt-line:last-child{border-bottom:none;}
+.receipt-line.total{font-weight:700;font-size:12px;border-top:2px solid #333;border-bottom:none;margin-top:4px;padding-top:6px;}
+.receipt-spec{font-size:10px;color:#999;padding-left:8px;}
+.mc-actions{display:flex;gap:6px;padding:0 13px 11px;}
+.mc-reprint{font-size:9px;color:#bbb;padding:4px 0;text-align:center;cursor:pointer;text-decoration:underline;}
+.abtn{flex:1;padding:8px;border-radius:8px;border:none;font-family:'Noto Sans SC',sans-serif;
+  font-size:11px;font-weight:600;cursor:pointer;transition:opacity 0.15s;}
+.abtn:active{opacity:0.8;}
+.abtn.green{background:var(--green);color:#fff;}
+.abtn.orange{background:var(--orange);color:#fff;}
+.abtn.sec{background:#f0f0f0;color:#555;}
+.abtn.red{background:var(--red);color:#fff;}
+
+/* ── ORDER TAB SUB-NAV ── */
+.order-sub-nav{display:flex;background:#fff;border-bottom:1px solid #eee;flex-shrink:0;}
+.osn-btn{flex:1;padding:9px;border:none;background:transparent;font-family:'Noto Sans SC',sans-serif;
+  font-size:11px;font-weight:500;cursor:pointer;color:#999;border-bottom:2px solid transparent;}
+.osn-btn.active{color:var(--red);border-bottom-color:var(--red);}
+
+/* ── DATE FILTER ── */
+.date-filter{display:flex;gap:6px;padding:8px 11px;background:#fff;border-bottom:1px solid #f0f0f0;flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.df-btn{padding:4px 10px;border-radius:12px;border:1.5px solid #e8e8e8;font-size:10px;
+  font-weight:500;cursor:pointer;white-space:nowrap;background:#fff;color:#666;font-family:'Noto Sans SC',sans-serif;}
+.df-btn.active{background:var(--red);color:#fff;border-color:var(--red);}
+
+/* ── STATS ── */
+.stats-section{padding:11px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px;}
+.stat-card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 6px rgba(0,0,0,0.04);cursor:pointer;transition:transform 0.1s;}
+.stat-card:active{transform:scale(0.98);}
+.stat-card.wide{grid-column:span 2;background:var(--red);}
+.stat-label{font-size:10px;color:#999;margin-bottom:4px;}
+.stat-card.wide .stat-label{color:rgba(255,255,255,0.65);}
+.stat-val{font-size:22px;font-weight:900;color:var(--dark);}
+.stat-card.wide .stat-val{color:#fff;font-size:28px;}
+.stat-sub{font-size:9px;color:#bbb;margin-top:2px;}
+.stat-card.wide .stat-sub{color:rgba(255,255,255,0.55);}
+.chart-card{background:#fff;border-radius:12px;padding:13px;margin-bottom:9px;box-shadow:0 2px 6px rgba(0,0,0,0.04);}
+.chart-title{font-size:12px;font-weight:700;color:var(--dark);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.chart-title a{font-size:10px;color:var(--blue);cursor:pointer;font-weight:400;}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:70px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.bar{width:100%;border-radius:3px 3px 0 0;background:var(--red);opacity:0.55;}
+.bar.peak{opacity:1;}
+.bar-lbl{font-size:8px;color:#bbb;}
+.top-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f8f8f8;}
+.top-row:last-child{border-bottom:none;}
+.rank{width:16px;font-size:10px;font-weight:700;color:#ccc;flex-shrink:0;}
+.rank.gold{color:#F5A623;}.rank.silver{color:#999;}.rank.bronze{color:#CD7F32;}
+.top-name{flex:1;font-size:11px;color:var(--dark);}
+.top-bar-w{width:60px;height:4px;background:#f0f0f0;border-radius:2px;overflow:hidden;}
+.top-bar-f{height:100%;border-radius:2px;background:var(--red);}
+.top-cnt{font-size:10px;color:#999;width:24px;text-align:right;}
+.dl-btn{width:100%;padding:11px;border-radius:10px;background:var(--blue);color:#fff;border:none;
+  font-family:'Noto Sans SC',sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:2px;}
+
+/* ── MENU MANAGE ── */
+.mg-sec-title{font-size:10px;color:#aaa;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  padding:9px 13px 5px;background:#f5f1ed;}
+.mg-item{background:#fff;display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border-bottom:1px solid #f8f8f8;}
+.mg-name{font-size:11px;font-weight:600;color:var(--dark);}
+.mg-price{font-size:10px;color:var(--red);font-weight:700;margin-top:1px;}
+.mg-actions{display:flex;align-items:center;gap:6px;}
+.ebtn{font-size:9px;padding:2px 7px;border-radius:5px;cursor:pointer;font-family:'Noto Sans SC',sans-serif;}
+.ebtn.edit{border:1.5px solid #e8e8e8;background:#fff;color:#666;}
+.ebtn.del{border:1.5px solid #FFE4E0;background:#fff;color:var(--red);}
+.tog{width:32px;height:17px;background:#ddd;border-radius:9px;position:relative;cursor:pointer;transition:background 0.18s;flex-shrink:0;}
+.tog.on{background:var(--green);}
+.tog-knob{width:13px;height:13px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left 0.18s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.tog.on .tog-knob{left:17px;}
+
+/* ── PAYMENT MODAL ── */
+.pay-ov{position:absolute;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;z-index:20;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.pay-ov.show{opacity:1;pointer-events:all;}
+.pay-sheet{background:#fff;border-radius:22px 22px 0 0;width:100%;padding-bottom:22px;transform:translateY(28px);transition:transform 0.28s;}
+.pay-ov.show .pay-sheet{transform:translateY(0);}
+.pay-hd{padding:18px 18px 14px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;}
+.pay-hd-title{font-size:15px;font-weight:700;color:var(--dark);}
+.pay-order-block{text-align:center;padding:18px 18px 14px;border-bottom:1px solid #f5f5f5;}
+.pay-order-num-lbl{font-size:12px;color:#999;margin-bottom:6px;}
+.pay-amount{font-size:56px;font-weight:900;color:var(--red);letter-spacing:-2px;line-height:1;}
+.pay-yuan{font-size:20px;font-weight:700;vertical-align:top;margin-top:10px;display:inline-block;}
+.pay-method-title{font-size:10px;color:#aaa;padding:12px 18px 8px;font-weight:600;letter-spacing:0.5px;}
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 18px;}
+.pmb{padding:12px 8px;border-radius:12px;border:2px solid #f0f0f0;background:#fff;cursor:pointer;
+  text-align:center;transition:all 0.12s;font-family:'Noto Sans SC',sans-serif;}
+.pmb:active{transform:scale(0.97);}
+.pmb.sel{border-color:var(--green);background:var(--green-light);}
+.pmb.waive{border-color:#f0e8e0;background:#FFF8F4;}
+.pmb.waive.sel{border-color:var(--orange);background:#FFF3E0;}
+.pmb-icon{font-size:20px;margin-bottom:3px;}
+.pmb-label{font-size:11px;font-weight:700;color:var(--dark);}
+.waive-rs{padding:0 18px;margin-top:9px;display:none;flex-direction:column;gap:6px;}
+.waive-rs.show{display:flex;}
+.wr-btn{padding:10px 12px;border-radius:10px;border:1.5px solid #f0e8e0;background:#fff;
+  text-align:left;cursor:pointer;font-family:'Noto Sans SC',sans-serif;font-size:12px;color:var(--dark);}
+.wr-btn.sel{border-color:var(--orange);background:#FFF3E0;font-weight:600;color:var(--orange);}
+.pay-confirm{margin:14px 18px 0;width:calc(100% - 36px);background:var(--green);color:#fff;border:none;
+  border-radius:12px;padding:14px;font-family:'Noto Sans SC',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.pay-confirm:disabled{background:#e0e0e0;color:#aaa;cursor:not-allowed;}
+
+/* ── CONFIRM DIALOG (reprint) ── */
+.confirm-dlg{background:#fff;border-radius:18px;padding:22px 20px;width:100%;max-width:300px;text-align:center;}
+.cdlg-icon{font-size:32px;margin-bottom:8px;}
+.cdlg-title{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:6px;}
+.cdlg-sub{font-size:11px;color:#999;line-height:1.6;margin-bottom:18px;}
+.cdlg-btns{display:flex;gap:8px;}
+.cdlg-btn{flex:1;padding:11px;border-radius:10px;border:none;font-family:'Noto Sans SC',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.cdlg-btn.cancel{background:#f0f0f0;color:#555;}
+.cdlg-btn.confirm{background:var(--orange);color:#fff;}
+
+/* ── DETAIL SHEET (stat drill-down) ── */
+.detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f8f8f8;font-size:12px;}
+.detail-row:last-child{border-bottom:none;}
+.detail-lbl{color:#555;}
+.detail-val{font-weight:700;color:var(--dark);}
+.detail-tag{font-size:9px;padding:1px 6px;border-radius:4px;margin-left:4px;}
+
+/* ── EDIT MODAL ── */
+.edit-ov{position:absolute;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;
+  justify-content:center;z-index:20;opacity:0;pointer-events:none;transition:opacity 0.22s;padding:18px;}
+.edit-ov.show{opacity:1;pointer-events:all;}
+.edit-modal{background:#fff;border-radius:18px;width:100%;padding:18px;max-height:80%;overflow-y:auto;scrollbar-width:none;}
+.edit-modal h3{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:14px;}
+.ef{margin-bottom:10px;}
+.ef-label{font-size:10px;color:#999;margin-bottom:4px;}
+.ef-input{width:100%;border:1.5px solid #e8e8e8;border-radius:8px;padding:8px 11px;
+  font-family:'Noto Sans SC',sans-serif;font-size:12px;outline:none;color:var(--dark);}
+.ef-input:focus{border-color:var(--red);}
+.ef-row{display:flex;gap:7px;margin-top:14px;}
+.ef-save{flex:1;background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px;
+  font-family:'Noto Sans SC',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.ef-cancel{flex:1;background:#f0f0f0;color:#555;border:none;border-radius:8px;padding:10px;
+  font-family:'Noto Sans SC',sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+
+/* ── PRINT NOTIF ── */
+.pn{position:absolute;top:14px;left:14px;right:14px;background:#111;color:#fff;border-radius:12px;
+  padding:11px 13px;display:flex;align-items:center;gap:9px;z-index:30;
+  transform:translateY(-130px);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+.pn.show{transform:translateY(0);}
+.pn-bar{height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:6px;overflow:hidden;}
+.pn-fill{height:100%;background:var(--orange);border-radius:2px;width:0;transition:width 2.8s linear;}
+
+/* ── SYNC INDICATOR ── */
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#4CAF50;display:inline-block;animation:pulse 1.5s infinite;}
+.sync-dot.error{background:var(--red);animation:none;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(90px);
+  background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:40px;font-size:12px;
+  font-family:'Noto Sans SC',sans-serif;transition:transform 0.3s;z-index:9999;white-space:nowrap;
+  box-shadow:0 4px 16px rgba(0,0,0,0.3);}
+</style>
+</head>
+<body>
+<h1 class="title">🍜 小谢螺蛳粉</h1>
+<p class="subtitle">天空一号公寓店 · 系统演示 v3.0 &nbsp; <span class="sync-dot" id="sync-dot"></span> 实时同步</p>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('menu',this)">顾客点餐</button>
+  <button class="tab-btn" onclick="showTab('order',this)">我的订单</button>
+  <button class="tab-btn" onclick="showTab('merchant',this)">摊主后台</button>
+</div>
+<div class="phones-row">
+
+<!-- ══ CUSTOMER MENU PHONE ══ -->
+<div class="phone-wrap" id="view-menu">
+  <div class="phone-label">顾客端 · 点餐</div>
+  <div class="phone">
+    <div class="c-header">
+      <div class="shop-name">小谢螺蛳粉</div>
+      <div class="shop-sub">天空一号公寓店 · 夜市C区 06号摊</div>
+      <span class="table-tag">📍 桌号 08</span>
+    </div>
+    <div class="cat-tabs" id="customer-cat-tabs"></div>
+    <div class="menu-list" id="customer-menu-list"></div>
+    <div class="cart-bar empty" id="cart-bar" onclick="openCartSheet()">
+      <div class="cart-icon">🛒<div class="cart-badge" id="cart-badge">0</div></div>
+      <div class="cart-text">查看购物车</div>
+      <div class="cart-total" id="cart-total-disp">¥0</div>
+    </div>
+    <!-- CUSTOMIZE MODAL -->
+    <div class="ov" id="modal" onclick="maybeClose(event,'modal')">
+      <div class="sheet">
+        <div class="sheet-hd">
+          <div>
+            <div class="sheet-title" id="modal-item-name"></div>
+            <div style="font-size:9px;color:#bbb;margin-top:2px;font-style:italic">小料：酸豆角、酸笋、腐竹、木耳丝、花生米、葱</div>
+            <div style="font-size:18px;font-weight:700;color:var(--red);margin-top:4px" id="modal-price">¥10</div>
+          </div>
+          <button class="close-btn" onclick="closeSheet('modal')">✕</button>
+        </div>
+        <div class="opt-grp">
+          <div class="opt-title">粉型 <span class="req-tag">必选</span></div>
+          <div class="opt-chips" id="fen-chips">
+            <div class="chip sel" onclick="sel(this)">广西米粉</div>
+            <div class="chip" onclick="sel(this)">河粉</div>
+          </div>
+        </div>
+        <div class="opt-grp" style="margin-top:10px">
+          <div class="opt-title">份量 <span class="req-tag">必选</span></div>
+          <div class="opt-chips" id="amt-chips">
+            <div class="chip" onclick="sel(this)">少粉</div>
+            <div class="chip sel" onclick="sel(this)">正常</div>
+            <div class="chip" onclick="sel(this)">多粉</div>
+          </div>
+        </div>
+        <div class="opt-grp" style="margin-top:10px">
+          <div class="opt-title">辣度 <span class="req-tag">必选</span></div>
+          <div class="opt-chips" id="la-chips">
+            <div class="chip sel" onclick="sel(this)">小辣</div>
+            <div class="chip" onclick="sel(this)">中辣</div>
+            <div class="chip" onclick="sel(this)">大辣</div>
+          </div>
+        </div>
+        <div class="opt-grp" style="margin-top:10px">
+          <div class="opt-title">加料 <span class="opt-tag">（可多选，不选即原味；点＋可多份）</span></div>
+          <div class="topping-grid" id="topping-grid"></div>
+        </div>
+        <div class="opt-grp" style="margin-top:10px">
+          <div class="opt-title">其他要求 <span class="opt-tag">（去掉不喜欢的小料）</span></div>
+          <div class="opt-chips">
+            <div class="chip multi" onclick="multiSel(this)">走酸豆角</div>
+            <div class="chip multi" onclick="multiSel(this)">走酸笋</div>
+            <div class="chip multi" onclick="multiSel(this)">走腐竹</div>
+            <div class="chip multi" onclick="multiSel(this)">走木耳丝</div>
+            <div class="chip multi" onclick="multiSel(this)">走花生米</div>
+            <div class="chip multi" onclick="multiSel(this)">走葱</div>
+          </div>
+        </div>
+        <div class="opt-grp" style="margin-top:10px">
+          <div class="opt-title">跟餐优惠 <span class="opt-tag">（单选，优惠¥2）</span></div>
+          <div class="opt-chips" id="combo-chips"></div>
+        </div>
+        <div class="opt-grp" style="margin-top:10px">
+          <div class="opt-title">备注 <span class="opt-tag">（最多50字）</span></div>
+          <textarea class="note-input" id="note-input" rows="2" maxlength="50"
+            placeholder="特殊要求请在此备注，例如：多点葱花…"
+            oninput="document.getElementById('note-cnt').textContent=this.value.length+'/50'"></textarea>
+          <div class="note-counter" id="note-cnt">0/50</div>
+        </div>
+        <button class="confirm-btn" id="confirm-btn" onclick="confirmAdd()">加入购物车 · ¥10</button>
+      </div>
+    </div>
+    <!-- CART SHEET -->
+    <div class="ov" id="cart-sheet" onclick="maybeClose(event,'cart-sheet')">
+      <div class="sheet">
+        <div class="sheet-hd">
+          <div class="sheet-title">购物车</div>
+          <button class="close-btn" onclick="closeSheet('cart-sheet')">✕</button>
+        </div>
+        <div style="padding:0 14px" id="cart-items-list"></div>
+        <div class="cart-total-row">
+          <span style="font-size:13px;color:#999">合计</span>
+          <span style="font-size:22px;font-weight:900;color:var(--red)" id="cart-sheet-total">¥0</span>
+        </div>
+        <button class="submit-btn" onclick="submitOrder()">确认下单</button>
+        <div style="font-size:10px;color:#bbb;text-align:center;margin-top:8px" id="net-status-customer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CUSTOMER ORDER PHONE ══ -->
+<div class="phone-wrap" id="view-order" style="display:none">
+  <div class="phone-label">顾客端 · 我的订单</div>
+  <div class="phone" style="display:flex;flex-direction:column;">
+    <div id="order-status-container" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#bbb;padding:40px;">
+        <div style="font-size:44px">🛒</div>
+        <div style="font-size:13px;font-weight:600;">还没有订单</div>
+        <div style="font-size:11px;text-align:center;line-height:1.7">去点餐后下单<br>订单状态会在这里实时更新</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MERCHANT PHONE ══ -->
+<div class="phone-wrap" id="view-merchant" style="display:none">
+  <div class="phone-label">摊主端 · 仅摊主可见</div>
+  <div class="phone" style="display:flex;flex-direction:column;">
+    <!-- PRINT NOTIF -->
+    <div class="pn" id="print-notif">
+      <div style="font-size:20px;flex-shrink:0">🖨️</div>
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:700;" id="pn-text">新订单 · 正在打印</div>
+        <div style="font-size:9px;color:#aaa;margin-top:1px" id="pn-sub"></div>
+        <div class="pn-bar"><div class="pn-fill" id="pn-fill"></div></div>
+      </div>
+    </div>
+    <div class="m-header">
+      <div><div class="m-title">小谢螺蛳粉 · 天空一号</div><div class="m-sub" id="biz-day-label">营业日 –</div></div>
+      <div style="font-size:24px">👨‍🍳</div>
+    </div>
+    <div class="m-nav">
+      <button class="m-nav-btn active" onclick="mNav(this,'m-orders')">📋 接单</button>
+      <button class="m-nav-btn" onclick="mNav(this,'m-stats')">📊 报表</button>
+      <button class="m-nav-btn" onclick="mNav(this,'m-menu')">🍜 菜单</button>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div id="m-orders" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+      <div class="order-sub-nav">
+        <button class="osn-btn active" id="osn-active" onclick="switchOrderTab('active',this)">进行中 <span id="osn-active-cnt"></span></button>
+        <button class="osn-btn" id="osn-done" onclick="switchOrderTab('done',this)">已完成 <span id="osn-done-cnt"></span></button>
+      </div>
+      <div class="date-filter" id="order-date-filter">
+        <button class="df-btn active" onclick="setOrderDateFilter('today',this)">今日</button>
+        <button class="df-btn" onclick="setOrderDateFilter('yesterday',this)">昨日</button>
+        <button class="df-btn" onclick="setOrderDateFilter('2daysago',this)">前日</button>
+        <button class="df-btn" onclick="setOrderDateFilter('range',this)">自定义区间</button>
+      </div>
+      <div class="m-content" id="merchant-orders-list-container">
+        <div class="orders-panel" id="merchant-orders-list"></div>
+      </div>
+    </div>
+
+    <!-- STATS TAB -->
+    <div id="m-stats" style="display:none;flex:1;overflow:hidden;flex-direction:column;display:none;">
+      <div class="date-filter" id="stats-date-filter">
+        <button class="df-btn active" onclick="setStatsFilter('bizday',this)">今日营业日</button>
+        <button class="df-btn" onclick="setStatsFilter('yesterday',this)">昨日</button>
+        <button class="df-btn" onclick="setStatsFilter('week',this)">本周</button>
+        <button class="df-btn" onclick="setStatsFilter('month',this)">本月</button>
+        <button class="df-btn" onclick="setStatsFilter('range',this)">自定义</button>
+      </div>
+      <div class="m-content">
+        <div class="stats-section">
+          <div class="stat-grid">
+            <div class="stat-card wide" onclick="openStatDetail('revenue')">
+              <div class="stat-label">营业额 <span id="stats-period-label" style="font-size:9px;opacity:0.7">(今日营业日)</span></div>
+              <div class="stat-val" id="stat-revenue">¥0</div>
+              <div class="stat-sub" id="stat-orders-sub">共 0 单</div>
+            </div>
+            <div class="stat-card" onclick="openStatDetail('cash')">
+              <div class="stat-label">💵 现金</div>
+              <div class="stat-val" style="font-size:18px" id="stat-cash">¥0</div>
+              <div class="stat-sub">点击查看明细</div>
+            </div>
+            <div class="stat-card" onclick="openStatDetail('digital')">
+              <div class="stat-label">📱 微信/支付宝</div>
+              <div class="stat-val" style="font-size:18px" id="stat-digital">¥0</div>
+              <div class="stat-sub">点击查看明细</div>
+            </div>
+            <div class="stat-card" onclick="openStatDetail('waive')" style="cursor:pointer">
+              <div class="stat-label">🎁 免单</div>
+              <div class="stat-val" style="font-size:18px;color:var(--orange)" id="stat-waive">0单</div>
+              <div class="stat-sub">点击查看明细</div>
+            </div>
+            <div class="stat-card" onclick="openStatDetail('profit')">
+              <div class="stat-label">💰 利润估算</div>
+              <div class="stat-val" style="font-size:18px;color:var(--green)" id="stat-profit">¥0</div>
+              <div class="stat-sub">成本率 55%</div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">⏰ 高峰时段 <a onclick="showToast('根据筛选日期动态计算')">动态</a></div>
+            <div class="bar-chart" id="peak-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">🏆 热卖排行 TOP10 <a onclick="openTopAll()">查看全部</a></div>
+            <div id="stats-top-items"></div>
+          </div>
+          <button class="dl-btn" onclick="downloadCSV()">⬇️ 下载销售数据 Excel (CSV)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENU TAB -->
+    <div id="m-menu" style="display:none;flex:1;overflow-y:auto;background:#f5f1ed;scrollbar-width:none;">
+      <div style="padding:11px">
+        <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.04);margin-bottom:9px">
+          <div style="padding:10px 13px;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:12px;font-weight:700;color:var(--dark)">菜品管理</div>
+            <button onclick="openEdit(-1,true,'item')" style="background:var(--red);color:#fff;border:none;border-radius:7px;padding:4px 10px;font-size:10px;font-weight:600;cursor:pointer">+ 添加</button>
+          </div>
+          <div id="menu-manage-list"></div>
+        </div>
+        <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.04)">
+          <div style="padding:10px 13px;border-bottom:1px solid #f5f5f5"><div style="font-size:12px;font-weight:700;color:var(--dark)">摊位设置</div></div>
+          <div style="padding:10px 13px;display:flex;flex-direction:column;gap:11px">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--dark)">📍 摊位二维码</span><button style="background:var(--light);border:none;border-radius:6px;padding:4px 10px;font-size:10px;color:var(--mid);cursor:pointer;font-weight:600">下载</button></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--dark)">🖨️ 打印机</span><span style="font-size:10px;color:var(--green);font-weight:600">已连接</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--dark)">🔔 营业状态</span><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--dark)">🕓 营业日结算时间</span><span style="font-size:10px;color:var(--blue);font-weight:600">凌晨 4:00</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div class="pay-ov" id="pay-ov" onclick="maybeClosePay(event)">
+      <div class="pay-sheet">
+        <div class="pay-hd">
+          <div class="pay-hd-title">💰 收款确认</div>
+          <button class="close-btn" onclick="closePayModal()">✕</button>
+        </div>
+        <div class="pay-order-block">
+          <div class="pay-order-num-lbl">订单号 <span id="pay-num-display">#0001</span></div>
+          <div><span class="pay-yuan">¥</span><span class="pay-amount" id="pay-amount-display">0</span></div>
+        </div>
+        <div class="pay-method-title">选择收款方式</div>
+        <div class="pay-methods">
+          <div class="pmb" onclick="selPay(this,'cash')"><div class="pmb-icon">💵</div><div class="pmb-label">现金</div></div>
+          <div class="pmb" onclick="selPay(this,'alipay')"><div class="pmb-icon">🔵</div><div class="pmb-label">支付宝</div></div>
+          <div class="pmb" onclick="selPay(this,'wechat')"><div class="pmb-icon">💚</div><div class="pmb-label">微信支付</div></div>
+          <div class="pmb waive" onclick="selPay(this,'waive')"><div class="pmb-icon">🎁</div><div class="pmb-label">免单</div></div>
+        </div>
+        <div class="waive-rs" id="waive-rs">
+          <div style="font-size:10px;color:#aaa;margin-bottom:2px">选择免单/取消理由</div>
+          <div class="wr-btn" onclick="selWaive(this,'出错补偿')">① 出错补偿</div>
+          <div class="wr-btn" onclick="selWaive(this,'经营推广')">② 经营推广</div>
+          <div class="wr-btn" onclick="selWaive(this,'人情关系')">③ 人情关系</div>
+          <div class="wr-btn" onclick="selWaive(this,'取消订单')">④ 取消订单</div>
+        </div>
+        <button class="pay-confirm" id="pay-confirm-btn" onclick="completePay()" disabled>确认收款</button>
+      </div>
+    </div>
+
+    <!-- CONFIRM DIALOG (reprint) -->
+    <div class="ov center" id="confirm-dlg-ov" onclick="maybeClose(event,'confirm-dlg-ov')">
+      <div class="confirm-dlg">
+        <div class="cdlg-icon">🖨️</div>
+        <div class="cdlg-title">二次打印确认</div>
+        <div class="cdlg-sub">此订单已打印过一次。<br>确认要<b>重新打印</b>吗？<br>请避免重复出餐。</div>
+        <div class="cdlg-btns">
+          <button class="cdlg-btn cancel" onclick="closeSheet('confirm-dlg-ov')">取消</button>
+          <button class="cdlg-btn confirm" onclick="doReprint()">确认打印</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAT DETAIL SHEET -->
+    <div class="ov" id="stat-detail-ov" onclick="maybeClose(event,'stat-detail-ov')">
+      <div class="sheet">
+        <div class="sheet-hd">
+          <div class="sheet-title" id="stat-detail-title">明细</div>
+          <button class="close-btn" onclick="closeSheet('stat-detail-ov')">✕</button>
+        </div>
+        <div style="padding:0 14px 14px" id="stat-detail-content"></div>
+      </div>
+    </div>
+
+    <!-- TOP ALL SHEET -->
+    <div class="ov" id="top-all-ov" onclick="maybeClose(event,'top-all-ov')">
+      <div class="sheet">
+        <div class="sheet-hd">
+          <div class="sheet-title">全部热卖排行</div>
+          <button class="close-btn" onclick="closeSheet('top-all-ov')">✕</button>
+        </div>
+        <div style="padding:0 14px 14px" id="top-all-content"></div>
+      </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="edit-ov" id="edit-ov" onclick="maybeCloseEdit(event)">
+      <div class="edit-modal">
+        <h3 id="edit-title">编辑菜品</h3>
+        <div class="ef"><div class="ef-label">名称</div><input class="ef-input" id="edit-name" placeholder="名称"></div>
+        <div class="ef"><div class="ef-label">价格（元）</div><input class="ef-input" id="edit-price" type="number" placeholder="价格"></div>
+        <div class="ef" id="edit-cat-row"><div class="ef-label">分类</div>
+          <select class="ef-input" id="edit-cat">
+            <option value="noodles">螺蛳粉</option>
+            <option value="drinks">饮料</option>
+            <option value="dessert">甜品</option>
+          </select>
+        </div>
+        <div class="ef" style="display:flex;align-items:center;justify-content:space-between">
+          <div class="ef-label" style="margin:0">是否上架</div>
+          <div class="tog on" id="edit-tog" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div>
+        </div>
+        <div class="ef-row">
+          <button class="ef-cancel" onclick="closeEdit()">取消</button>
+          <button class="ef-save" onclick="saveEdit()">保存</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end merchant phone -->
+</div>
+
+</div><!-- end phones-row -->
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   CONSTANTS & CONFIG
+══════════════════════════════════════════════ */
+const STORE = {id:'001', name:'小谢螺蛳粉', branch:'天空一号公寓店', table:'08'};
+const BIZ_DAY_CUTOFF_HOUR = 4; // before 4am = previous biz day
+
+function getBizDay(date = new Date()) {
+  const d = new Date(date);
+  if (d.getHours() < BIZ_DAY_CUTOFF_HOUR) d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
+function fmtDate(d) {
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+
+/* ══════════════════════════════════════════════
+   DATABASE (in-memory, simulates persistent storage)
+══════════════════════════════════════════════ */
+const DB = {
+  items:[
+    {id:1,cat:'noodles',name:'招牌螺蛳粉',desc:'正宗柳州秘制螺蛳汤底',price:10,on:true,hot:true},
+    {id:2,cat:'noodles',name:'干拌螺蛳粉',desc:'去汤拌料，口感浓郁',price:10,on:true,hot:false},
+    {id:3,cat:'drinks',name:'可乐（罐）',desc:'',price:4,on:false,hot:false},
+    {id:4,cat:'drinks',name:'雪碧（罐）',desc:'',price:4,on:false,hot:false},
+    {id:5,cat:'drinks',name:'王老吉（罐）',desc:'',price:5,on:false,hot:false},
+    {id:6,cat:'drinks',name:'百威（罐）',desc:'',price:7,on:false,hot:false},
+    {id:7,cat:'drinks',name:'纯生（罐）',desc:'',price:6,on:false,hot:false},
+    {id:8,cat:'drinks',name:'农夫山泉（支）',desc:'',price:2,on:false,hot:false},
+    {id:9,cat:'dessert',name:'冰镇绿豆沙',desc:'清热消暑',price:6,on:false,hot:false},
+    {id:10,cat:'dessert',name:'木薯糖水',desc:'软糯香甜',price:9,on:false,hot:false},
+  ],
+  toppings:[
+    {id:'t1',name:'🐷 虎皮猪脚',price:10,on:true},
+    {id:'t2',name:'🍗 卤鸡腿',price:5,on:true},
+    {id:'t3',name:'🦆 卤鸭腿',price:5,on:true},
+    {id:'t4',name:'🥩 猪皮',price:5,on:true},
+    {id:'t5',name:'🥩 烧肉',price:5,on:true},
+    {id:'t6',name:'🦶 虎皮鸡爪',price:4,on:true},
+    {id:'t7',name:'🥚 炸蛋',price:3,on:true},
+    {id:'t8',name:'🌭 腊肠',price:3,on:true},
+    {id:'t9',name:'🥩 牛肉丸',price:3,on:true},
+    {id:'t10',name:'🦆 虎皮鸭爪',price:3,on:true},
+    {id:'t11',name:'🌭 香肠',price:2,on:true},
+    {id:'t12',name:'🫘 卤豆泡',price:2,on:true},
+    {id:'t13',name:'🍢 卤豆腐串',price:2,on:true},
+    {id:'t14',name:'🥚 煎蛋',price:2,on:true},
+    {id:'t15',name:'🍄 木耳丝',price:2,on:true},
+    {id:'t16',name:'🫘 腐竹',price:2,on:true},
+    {id:'t17',name:'🥬 通菜',price:2,on:true},
+    {id:'t18',name:'🌶 酸豆角',price:1,on:true},
+    {id:'t19',name:'🎋 酸笋',price:1,on:true},
+  ],
+  CL:{noodles:'螺蛳粉',drinks:'饮料',dessert:'甜品'},
+  CE:{noodles:'🍜',drinks:'🥤',dessert:'🍵'},
+  cats(){return [...new Set(this.items.map(i=>i.cat))]},
+  nextId(){return Math.max(0,...this.items.map(i=>i.id))+1},
+  nextTopId(){const ns=this.toppings.map(t=>parseInt(t.id.replace('t',''))).filter(n=>!isNaN(n));return 't'+(Math.max(0,...ns)+1);},
+  activeDesserts(){return this.items.filter(i=>i.cat==='dessert'&&i.on)},
+  activeToppings(){return this.toppings.filter(t=>t.on)},
+};
+
+/* ══════════════════════════════════════════════
+   ORDER STATE & ID GENERATION
+══════════════════════════════════════════════ */
+let orders = []; // all orders this session
+let orderSeq = 0; // daily sequence counter (per biz day)
+let lastBizDay = getBizDay();
+let customerLatestOrder = null; // for customer view
+
+function genOrderId() {
+  const bday = getBizDay();
+  if (bday !== lastBizDay) { orderSeq = 0; lastBizDay = bday; }
+  orderSeq++;
+  const fullId = fmtDate(new Date()).replace(/(\d{4})(\d{2})(\d{2})/,'$1$2$3') + String(orderSeq).padStart(4,'0');
+  const displayNum = String(orderSeq).padStart(4,'0');
+  return {fullId, displayNum};
+}
+
+function updateBizDayLabel() {
+  const bd = getBizDay();
+  document.getElementById('biz-day-label').textContent = `营业日 ${bd}（截至凌晨4时）`;
+}
+
+/* ══════════════════════════════════════════════
+   NETWORK SIMULATION (for prototype)
+══════════════════════════════════════════════ */
+let netOk = true;
+function simNetCheck() {
+  // In real app: actual fetch ping to server
+  // For prototype: simulate 97% success rate
+  netOk = Math.random() > 0.03;
+  const dot = document.getElementById('sync-dot');
+  if(dot) dot.className = 'sync-dot' + (netOk ? '' : ' error');
+  return netOk;
+}
+// Simulated real-time "push" - poll every 2s
+setInterval(() => {
+  simNetCheck();
+  // In real app: WebSocket would push order updates here
+}, 2000);
+
+/* ══════════════════════════════════════════════
+   CART
+══════════════════════════════════════════════ */
+let cart = [];
+function cartTotal(){return cart.reduce((s,l)=>s+l.lineTotal,0);}
+function cartCount(){return cart.reduce((s,l)=>s+l.qty,0);}
+function updateCartBar(){
+  const cnt=cartCount(), tot=cartTotal();
+  const bar=document.getElementById('cart-bar');
+  document.getElementById('cart-badge').textContent=cnt;
+  document.getElementById('cart-total-disp').textContent='¥'+tot;
+  bar.classList.toggle('empty', cnt===0);
+}
+
+/* ══════════════════════════════════════════════
+   RENDER ALL
+══════════════════════════════════════════════ */
+function renderAll(){
+  renderCustomerMenu();
+  renderToppings();
+  renderCombo();
+  renderMenuManage();
+  renderStats();
+  renderMerchantOrders();
+  updateCartBar();
+  updateBizDayLabel();
+}
+
+/* ── CUSTOMER MENU ── */
+function renderCustomerMenu(){
+  const cats=DB.cats();
+  document.getElementById('customer-cat-tabs').innerHTML=cats.map((c,i)=>
+    `<div class="cat-tab${i===0?' active':''}" onclick="switchCat(this,'ccat-${c}')">${DB.CL[c]}</div>`
+  ).join('');
+  document.getElementById('customer-menu-list').innerHTML=cats.map((c,ci)=>{
+    const its=[...DB.items.filter(i=>i.cat===c)].sort((a,b)=>b.on-a.on);
+    return `<div id="ccat-${c}"${ci>0?' style="display:none"':''}>
+      <div class="menu-section-title">${DB.CL[c]}</div>
+      ${its.map(item=>{
+        const so=!item.on;
+        const fn=item.cat==='noodles'?`openModal(${item.id})`:`quickAdd(${item.id})`;
+        return `<div class="menu-item${so?' soldout-item':''}"${!so?` onclick="${fn}"`:''}>
+          <div class="item-emoji">${DB.CE[item.cat]}</div>
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-desc">${item.desc}</div>
+            ${item.cat==='noodles'?'<div class="item-small">小料：酸豆角、酸笋、腐竹、木耳丝、花生米、葱</div>':''}
+            <div class="item-tags">
+              ${item.hot?'<span class="item-tag hot">🔥 热销</span>':''}
+              ${item.cat==='noodles'?'<span class="item-tag">辣度可调</span>':''}
+              ${so?'<span class="item-tag" style="background:#f0f0f0;color:#aaa">估清</span>':''}
+            </div>
+          </div>
+          <div class="item-price-add">
+            <div class="item-price${so?' soldout':''}">¥${item.price}${item.cat==='noodles'?'起':''}</div>
+            ${so?'<div class="soldout-badge">估清</div>':`<button class="add-btn" onclick="${fn};event.stopPropagation()">+</button>`}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+/* ── TOPPINGS WITH QTY ── */
+// toppingQtys: {id: qty}
+let toppingQtys = {};
+function renderToppings(){
+  const tops=DB.activeToppings();
+  toppingQtys={};
+  document.getElementById('topping-grid').innerHTML=tops.length===0
+    ?'<div style="grid-column:span 2;font-size:11px;color:#bbb;padding:6px 0">暂无可用配料</div>'
+    :tops.map(t=>`
+      <div class="top-item" id="ti-${t.id}">
+        <span class="top-name">${t.name}</span>
+        <div class="top-right">
+          <span class="top-price">+¥${t.price}</span>
+          <div class="top-qty-ctrl" id="tqc-${t.id}">
+            <button class="tqb plus-only" onclick="topQtyChange('${t.id}',${t.price},1)">+</button>
+          </div>
+        </div>
+      </div>`).join('');
+}
+
+function topQtyChange(tid, price, delta){
+  toppingQtys[tid] = Math.max(0, (toppingQtys[tid]||0) + delta);
+  const qty = toppingQtys[tid];
+  const ctrl = document.getElementById('tqc-'+tid);
+  const item = document.getElementById('ti-'+tid);
+  if(qty===0){
+    ctrl.innerHTML=`<button class="tqb plus-only" onclick="topQtyChange('${tid}',${price},1)">+</button>`;
+    item.classList.remove('has-qty');
+  } else {
+    ctrl.innerHTML=`<button class="tqb minus" onclick="topQtyChange('${tid}',${price},-1)">−</button>
+      <span class="tqb-num">${qty}</span>
+      <button class="tqb plus" onclick="topQtyChange('${tid}',${price},1)">+</button>`;
+    item.classList.add('has-qty');
+  }
+  recalc();
+}
+
+/* ── COMBO ── */
+function renderCombo(){
+  const active=DB.activeDesserts();
+  const el=document.getElementById('combo-chips');
+  if(!el)return;
+  el.innerHTML=active.length===0
+    ?'<div class="chip disabled">暂无可跟餐甜品（估清中）</div>'
+    :active.map(d=>`<div class="chip combo" onclick="selCombo(this,${d.price})">${d.name} ¥${d.price-2}</div>`).join('');
+}
+
+/* ══════════════════════════════════════════════
+   MODAL LOGIC
+══════════════════════════════════════════════ */
+let currentId=null, extraPrice=0, comboDiscount=0;
+
+function openModal(id){
+  currentId=id; extraPrice=0; comboDiscount=0;
+  const item=DB.items.find(i=>i.id===id);
+  document.getElementById('modal-item-name').textContent=item.name;
+  document.querySelectorAll('#fen-chips .chip').forEach((c,i)=>c.classList.toggle('sel',i===0));
+  document.querySelectorAll('#amt-chips .chip').forEach((c,i)=>c.classList.toggle('sel',i===1));
+  document.querySelectorAll('#la-chips .chip').forEach((c,i)=>c.classList.toggle('sel',i===0));
+  document.querySelectorAll('.chip.multi').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('.chip.combo').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('note-input').value='';
+  document.getElementById('note-cnt').textContent='0/50';
+  renderToppings(); renderCombo(); recalc();
+  openSheet('modal');
+}
+
+function recalc(){
+  const item=DB.items.find(i=>i.id===currentId);
+  if(!item)return;
+  let topExtra=0;
+  DB.activeToppings().forEach(t=>{const q=toppingQtys[t.id]||0;topExtra+=q*t.price;});
+  extraPrice=topExtra;
+  const t=item.price+extraPrice-comboDiscount;
+  document.getElementById('modal-price').textContent='¥'+t;
+  document.getElementById('confirm-btn').textContent='加入购物车 · ¥'+t;
+}
+
+function sel(el){el.closest('.opt-chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+function multiSel(el){el.classList.toggle('sel');}
+function selCombo(el,op){
+  const was=el.classList.contains('sel');
+  document.querySelectorAll('#combo-chips .chip.combo').forEach(c=>c.classList.remove('sel'));
+  comboDiscount=0;
+  if(!was){el.classList.add('sel');comboDiscount=2;}
+  recalc();
+}
+
+function confirmAdd(){
+  const item=DB.items.find(i=>i.id===currentId);
+  const unitPrice=item.price+extraPrice-comboDiscount;
+  const fen=[...document.querySelectorAll('#fen-chips .chip.sel')].map(c=>c.textContent).join('');
+  const amt=[...document.querySelectorAll('#amt-chips .chip.sel')].map(c=>c.textContent).join('');
+  const la=[...document.querySelectorAll('#la-chips .chip.sel')].map(c=>c.textContent).join('');
+  const tops=[];
+  DB.activeToppings().forEach(t=>{const q=toppingQtys[t.id]||0;if(q>0)tops.push({name:t.name,qty:q,unitPrice:t.price});});
+  const excludes=[...document.querySelectorAll('.chip.multi.sel')].map(c=>c.textContent).join('、');
+  const combo=[...document.querySelectorAll('#combo-chips .chip.sel')].map(c=>c.textContent).join('');
+  const note=document.getElementById('note-input').value.trim();
+
+  // Build structured spec for receipt
+  const specParts=[`${fen}·${amt}·${la}`];
+  if(tops.length) tops.forEach(t=>specParts.push(`加 ${t.name}×${t.qty}(+¥${t.unitPrice*t.qty})`));
+  if(excludes) specParts.push(excludes);
+  if(combo) specParts.push(`跟餐：${combo}`);
+  if(note) specParts.push(`备注：${note}`);
+  const spec=specParts.join('\n');
+
+  cart.push({itemId:item.id,name:item.name,spec,toppings:tops,unitPrice,qty:1,lineTotal:unitPrice});
+  updateCartBar(); closeSheet('modal'); showToast('✅ 已加入购物车！');
+}
+
+function quickAdd(id){
+  const item=DB.items.find(i=>i.id===id);
+  if(!item||!item.on)return;
+  cart.push({itemId:id,name:item.name,spec:'',toppings:[],unitPrice:item.price,qty:1,lineTotal:item.price});
+  updateCartBar(); showToast(`✅ 已加入：${item.name} ¥${item.price}`);
+}
+
+/* ══════════════════════════════════════════════
+   CART SHEET
+══════════════════════════════════════════════ */
+function openCartSheet(){
+  if(cartCount()===0)return;
+  renderCartSheet(); openSheet('cart-sheet');
+}
+function renderCartSheet(){
+  const el=document.getElementById('cart-items-list');
+  el.innerHTML=cart.map((line,idx)=>`
+    <div class="csi">
+      <div class="csi-info">
+        <div class="csi-name">${line.name}</div>
+        ${line.spec?`<div class="csi-spec">${line.spec.replace(/\n/g,'<br>')}</div>`:''}
+      </div>
+      <div class="csi-price">¥${line.lineTotal}</div>
+      <div class="qty-ctrl">
+        <button class="qb minus" onclick="changeQty(${idx},-1)">−</button>
+        <span class="qb-num">${line.qty}</span>
+        <button class="qb plus" onclick="changeQty(${idx},1)">+</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('cart-sheet-total').textContent='¥'+cartTotal();
+}
+function changeQty(idx,delta){
+  if(!cart[idx])return;
+  cart[idx].qty+=delta;
+  if(cart[idx].qty<=0) cart.splice(idx,1);
+  else cart[idx].lineTotal=cart[idx].unitPrice*cart[idx].qty;
+  updateCartBar();
+  if(cart.length===0){closeSheet('cart-sheet');return;}
+  renderCartSheet();
+}
+
+/* ══════════════════════════════════════════════
+   ORDER SUBMIT
+══════════════════════════════════════════════ */
+function submitOrder(){
+  if(cart.length===0)return;
+  // Network check
+  if(!simNetCheck()){
+    document.getElementById('net-status-customer').textContent='⚠️ 网络异常，下单失败！请重试';
+    document.getElementById('net-status-customer').style.color='var(--red)';
+    showToast('❌ 网络异常，下单未成功，请重试！');
+    return;
+  }
+  document.getElementById('net-status-customer').textContent='';
+
+  const {fullId, displayNum} = genOrderId();
+  const total = cartTotal();
+  const lines = [...cart];
+  cart = [];
+  updateCartBar();
+  closeSheet('cart-sheet');
+
+  const order = {
+    fullId, displayNum,
+    storeId: STORE.id, storeName: STORE.name, branch: STORE.branch,
+    lines, total,
+    status: 'making',
+    bizDay: getBizDay(),
+    time: new Date(),
+    printed: false,
+    payMethod: null, waiveReason: null,
+  };
+  orders.unshift(order);
+  customerLatestOrder = order;
+
+  // Sync customer order view
+  renderCustomerOrderView(order);
+  // Sync merchant
+  renderMerchantOrders();
+  // Trigger print
+  triggerPrint(order);
+
+  // Switch to order tab
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn')[1].classList.add('active');
+  showTab('order', null);
+  showToast(`🎉 下单成功！取餐号 #${displayNum}`);
+}
+
+/* ══════════════════════════════════════════════
+   CUSTOMER ORDER VIEW
+══════════════════════════════════════════════ */
+function renderCustomerOrderView(order){
+  if(!order) return;
+  const container=document.getElementById('order-status-container');
+  const hdrClass={making:'making',ready:'ready',paid:'paid'}[order.status]||'making';
+  const statusLabel={making:'制作中',ready:'请取餐并付款',paid:'已完成'}[order.status];
+  const steps=[
+    {done:true,active:false,icon:'✓',name:'下单成功',sub:'小票已自动打印'},
+    {done:order.status!=='making',active:order.status==='making',icon:'🍜',name:'制作中',sub:'摊主正在为你制作'},
+    {done:['ready','paid'].includes(order.status),active:order.status==='ready',icon:'🔔',name:'请取餐',sub:order.status==='ready'?'🎉 你的餐好了！请凭号取餐付款':'–'},
+    {done:order.status==='paid',active:false,icon:'💰',name:'付款完成',sub:order.status==='paid'?`已${({cash:'现金',alipay:'支付宝',wechat:'微信',waive:'免单'}[order.payMethod]||'')}结清`:'–'},
+  ];
+  container.innerHTML=`
+    <div class="os-hd ${hdrClass}" style="flex-shrink:0">
+      <div class="os-num-label">你的取餐号</div>
+      <div class="os-big-num">#${order.displayNum}</div>
+      <div class="os-pill"><div class="os-dot"></div>${statusLabel}</div>
+    </div>
+    <div class="os-body">
+      ${order.status==='ready'?`
+      <div class="pay-prompt">
+        <div class="pp-title">🎉 你的餐好了！请到 06号摊 取餐并付款</div>
+        <div class="pp-price">¥${order.total}</div>
+        <div class="pp-sub">向摊主报出取餐号 #${order.displayNum}</div>
+      </div>`:''}
+      <div class="os-card">
+        <div class="os-card-title">📦 订单进度</div>
+        ${steps.map((s,i)=>`<div class="os-step">
+          <div class="os-step-left">
+            <div class="os-circle ${s.done?'done':s.active?'active':'pending'}">${s.done?'✓':s.icon}</div>
+            ${i<steps.length-1?`<div class="os-line ${s.done?'done':''}"></div>`:''}
+          </div>
+          <div class="os-step-info" style="${i===steps.length-1?'padding-bottom:0':''}">
+            <div class="os-step-name">${s.name}</div>
+            <div class="os-step-sub">${s.sub}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+      <div class="os-card">
+        <div class="os-card-title">🧾 本次订单 · #${order.displayNum}</div>
+        ${order.lines.map(l=>`
+          <div style="padding:6px 0;border-bottom:1px solid #f5f5f5">
+            <div style="display:flex;justify-content:space-between">
+              <span style="font-size:12px;font-weight:700;color:var(--dark)">${l.name} ×${l.qty}</span>
+              <span style="font-size:13px;font-weight:700;color:var(--red)">¥${l.lineTotal}</span>
+            </div>
+            ${l.spec?`<div style="font-size:10px;color:#999;margin-top:2px;white-space:pre-line">${l.spec}</div>`:''}
+          </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;padding-top:9px;margin-top:2px">
+          <span style="font-size:12px;font-weight:700">合计</span>
+          <span style="font-size:15px;font-weight:900;color:var(--red)">¥${order.total}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   MERCHANT ORDERS
+══════════════════════════════════════════════ */
+let orderTab = 'active'; // 'active' | 'done'
+let orderDateFilter = 'today';
+
+function switchOrderTab(tab, btn){
+  orderTab = tab;
+  document.querySelectorAll('.osn-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // show date filter only for done tab
+  document.getElementById('order-date-filter').style.display = tab==='done' ? 'flex' : 'none';
+  renderMerchantOrders();
+}
+
+function setOrderDateFilter(f, btn){
+  orderDateFilter = f;
+  document.querySelectorAll('#order-date-filter .df-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMerchantOrders();
+}
+
+function renderMerchantOrders(){
+  const el = document.getElementById('merchant-orders-list');
+  const bizToday = getBizDay();
+  const bizYesterday = getBizDay(new Date(Date.now() - 86400000));
+  const biz2daysago = getBizDay(new Date(Date.now() - 2*86400000));
+
+  const active = orders.filter(o=>o.status!=='paid');
+  const done = orders.filter(o=>o.status==='paid');
+
+  // Update tab counters
+  document.getElementById('osn-active-cnt').textContent = active.length ? `(${active.length})` : '';
+  document.getElementById('osn-done-cnt').textContent = done.length ? `(${done.length})` : '';
+
+  if(orderTab==='active'){
+    if(active.length===0){
+      el.innerHTML=`<div style="text-align:center;padding:36px 18px;color:#bbb"><div style="font-size:34px;margin-bottom:8px">📋</div><div style="font-size:12px">暂无进行中订单</div></div>`;
+      return;
+    }
+    el.innerHTML=active.map(o=>merchantCard(o)).join('');
+  } else {
+    // done tab with date filter
+    let filtered = done;
+    if(orderDateFilter==='today') filtered = done.filter(o=>o.bizDay===bizToday);
+    else if(orderDateFilter==='yesterday') filtered = done.filter(o=>o.bizDay===bizYesterday);
+    else if(orderDateFilter==='2daysago') filtered = done.filter(o=>o.bizDay===biz2daysago);
+    // 'range' would open a date picker in real app
+
+    if(filtered.length===0){
+      el.innerHTML=`<div style="text-align:center;padding:36px 18px;color:#bbb"><div style="font-size:34px;margin-bottom:8px">✅</div><div style="font-size:12px">该日期无完成订单</div></div>`;
+      return;
+    }
+    // Group by bizDay
+    const byDay = {};
+    filtered.forEach(o=>{(byDay[o.bizDay]||(byDay[o.bizDay]=[])).push(o);});
+    el.innerHTML=Object.keys(byDay).sort().reverse().map(day=>{
+      const dayOrders = byDay[day];
+      const dayRev = dayOrders.filter(o=>o.payMethod!=='waive').reduce((s,o)=>s+o.total,0);
+      return `<div class="sec-head"><div class="sec-title">营业日 ${day}</div><div style="font-size:10px;color:#999">${dayOrders.length}单 · ¥${dayRev}</div></div>`
+        + dayOrders.map(o=>merchantCard(o)).join('');
+    }).join('');
+  }
+}
+
+let reprintTarget = null;
+
+function merchantCard(o){
+  const badgeClass={making:'making',ready:'ready',paid:'paid'}[o.status];
+  const badgeLabel={making:'🍜 制作中',ready:'🔔 等待取餐',paid:'✅ 已完成'}[o.status];
+  const t=o.time;
+  const tStr=`${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
+  // Build receipt lines
+  const receiptHtml = o.lines.map(l=>`
+    <div class="receipt-line" style="font-weight:700;font-size:12px">
+      <span>📌 ${l.name} ×${l.qty}</span><span>¥${l.lineTotal}</span>
+    </div>
+    ${l.toppings&&l.toppings.length?l.toppings.map(tp=>`
+      <div class="receipt-line" style="padding-left:12px">
+        <span>＋${tp.name} ×${tp.qty}</span><span>¥${tp.unitPrice*tp.qty}</span>
+      </div>`).join(''):''}
+    ${l.spec?l.spec.split('\n').filter(s=>!s.startsWith('加')).filter(s=>s).map(s=>`
+      <div class="receipt-spec">· ${s}</div>`).join(''):''}
+  `).join('');
+
+  // Preview (first line only)
+  const preview = o.lines.map(l=>l.name+'×'+l.qty).join('、');
+
+  let actions='';
+  if(o.status==='making'){
+    actions=`<div class="mc-actions"><button class="abtn green" onclick="markReady('${o.fullId}');event.stopPropagation()">✅ 做好了 · 叫号取餐</button></div>`;
+  } else if(o.status==='ready'){
+    actions=`<div class="mc-actions">
+      <button class="abtn sec" onclick="callAgain('${o.displayNum}');event.stopPropagation()">📢 再叫</button>
+      <button class="abtn orange" onclick="openPayModal('${o.fullId}');event.stopPropagation()">💰 收款</button>
+    </div>`;
+  } else {
+    const pl={cash:'现金',alipay:'支付宝',wechat:'微信',waive:`免单·${o.waiveReason}`}[o.payMethod]||'';
+    actions=`<div style="font-size:10px;color:#bbb;padding:0 13px 9px">💳 ${pl}</div>`;
+  }
+
+  return `<div class="mc">
+    <div class="mc-top" onclick="toggleDetail('${o.fullId}')">
+      <div class="mc-left">
+        <div class="mc-num">#${o.displayNum}</div>
+        <div class="mc-time">${tStr} · 营业日 ${o.bizDay}</div>
+      </div>
+      <div class="mc-right">
+        <div class="mc-price">¥${o.total}</div>
+        <div class="mc-badge ${badgeClass}">${badgeLabel}</div>
+      </div>
+    </div>
+    <div class="mc-preview">${preview} · 点击展开详情 ▾</div>
+    <div class="mc-detail" id="detail-${o.fullId}">
+      <div class="mc-detail-title">🧾 订单详情（完整小票）</div>
+      <div class="receipt">
+        <div style="font-size:10px;color:#aaa;margin-bottom:6px">订单号：${o.fullId} · ${tStr}</div>
+        ${receiptHtml}
+        <div class="receipt-line total"><span>合计</span><span>¥${o.total}</span></div>
+      </div>
+      <div class="mc-reprint" onclick="askReprint('${o.fullId}')">🖨️ 重新打印此订单</div>
+    </div>
+    ${actions}
+  </div>`;
+}
+
+function toggleDetail(fullId){
+  const el = document.getElementById('detail-'+fullId);
+  if(!el)return;
+  el.classList.toggle('open');
+}
+
+function askReprint(fullId){
+  reprintTarget = fullId;
+  openSheet('confirm-dlg-ov');
+}
+function doReprint(){
+  const o = orders.find(o=>o.fullId===reprintTarget);
+  if(o){ triggerPrint(o, true); }
+  closeSheet('confirm-dlg-ov');
+  showToast('🖨️ 重新打印中…');
+}
+
+/* ── MARK READY ── */
+function markReady(fullId){
+  const o=orders.find(o=>o.fullId===fullId);
+  if(!o)return;
+  o.status='ready';
+  renderMerchantOrders();
+  if(customerLatestOrder&&customerLatestOrder.fullId===fullId) renderCustomerOrderView(o);
+  showToast(`📢 #${o.displayNum} 已叫号！请顾客取餐付款`);
+}
+function callAgain(num){ showToast(`📢 ${num}号！${num}号顾客请取餐！`);}
+
+/* ══════════════════════════════════════════════
+   PAYMENT MODAL
+══════════════════════════════════════════════ */
+let payingFullId=null, selPayMethod=null, selWaiveReason=null;
+function openPayModal(fullId){
+  const o=orders.find(o=>o.fullId===fullId);
+  if(!o)return;
+  payingFullId=fullId; selPayMethod=null; selWaiveReason=null;
+  document.getElementById('pay-num-display').textContent='#'+o.displayNum;
+  document.getElementById('pay-amount-display').textContent=o.total;
+  document.querySelectorAll('.pmb').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.wr-btn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('waive-rs').classList.remove('show');
+  document.getElementById('pay-confirm-btn').disabled=true;
+  document.getElementById('pay-ov').classList.add('show');
+}
+function closePayModal(){document.getElementById('pay-ov').classList.remove('show');}
+function maybeClosePay(e){if(e.target.id==='pay-ov')closePayModal();}
+function selPay(el,method){
+  document.querySelectorAll('.pmb').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel'); selPayMethod=method; selWaiveReason=null;
+  document.querySelectorAll('.wr-btn').forEach(b=>b.classList.remove('sel'));
+  const wr=document.getElementById('waive-rs');
+  if(method==='waive'){wr.classList.add('show');document.getElementById('pay-confirm-btn').disabled=true;}
+  else{wr.classList.remove('show');document.getElementById('pay-confirm-btn').disabled=false;}
+}
+function selWaive(el,reason){
+  document.querySelectorAll('.wr-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel'); selWaiveReason=reason;
+  document.getElementById('pay-confirm-btn').disabled=false;
+}
+function completePay(){
+  const o=orders.find(o=>o.fullId===payingFullId);
+  if(!o)return;
+  o.status='paid'; o.payMethod=selPayMethod; o.waiveReason=selWaiveReason;
+  closePayModal(); renderMerchantOrders(); renderStats();
+  if(customerLatestOrder&&customerLatestOrder.fullId===payingFullId) renderCustomerOrderView(o);
+  const lbl={cash:'现金',alipay:'支付宝',wechat:'微信支付',waive:'免单·'+selWaiveReason}[selPayMethod]||'';
+  showToast(`✅ #${o.displayNum} 收款完成（${lbl}）`);
+}
+
+/* ══════════════════════════════════════════════
+   STATS
+══════════════════════════════════════════════ */
+let statsFilter='bizday';
+
+function setStatsFilter(f, btn){
+  statsFilter = f;
+  document.querySelectorAll('#stats-date-filter .df-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderStats();
+}
+
+function getFilteredOrders(){
+  const paid = orders.filter(o=>o.status==='paid');
+  const bizToday = getBizDay();
+  const bizYesterday = getBizDay(new Date(Date.now()-86400000));
+  const now = new Date();
+  const weekStart = new Date(now); weekStart.setDate(now.getDate()-now.getDay());
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  if(statsFilter==='bizday') return paid.filter(o=>o.bizDay===bizToday);
+  if(statsFilter==='yesterday') return paid.filter(o=>o.bizDay===bizYesterday);
+  if(statsFilter==='week') return paid.filter(o=>new Date(o.bizDay)>=weekStart);
+  if(statsFilter==='month') return paid.filter(o=>new Date(o.bizDay)>=monthStart);
+  return paid; // range = all for demo
+}
+
+function renderStats(){
+  const paid = getFilteredOrders();
+  const periodLabels={bizday:'今日营业日',yesterday:'昨日',week:'本周',month:'本月',range:'自定义区间'};
+  const rev = paid.filter(o=>o.payMethod!=='waive').reduce((s,o)=>s+o.total,0);
+  const cash = paid.filter(o=>o.payMethod==='cash').reduce((s,o)=>s+o.total,0);
+  const digital = paid.filter(o=>['alipay','wechat'].includes(o.payMethod)).reduce((s,o)=>s+o.total,0);
+  const waiveCnt = paid.filter(o=>o.payMethod==='waive').length;
+  const profit = Math.round(rev * 0.45); // 55% cost rate → 45% profit
+  const aov = paid.filter(o=>o.payMethod!=='waive').length ? Math.round(rev / paid.filter(o=>o.payMethod!=='waive').length) : 0;
+
+  const se = id => document.getElementById(id);
+  if(se('stat-revenue')) se('stat-revenue').textContent='¥'+rev;
+  if(se('stat-orders-sub')) se('stat-orders-sub').textContent=`共 ${paid.length} 单 · 客单价 ¥${aov}`;
+  if(se('stats-period-label')) se('stats-period-label').textContent='('+periodLabels[statsFilter]+')';
+  if(se('stat-cash')) se('stat-cash').textContent='¥'+cash;
+  if(se('stat-digital')) se('stat-digital').textContent='¥'+digital;
+  if(se('stat-waive')) se('stat-waive').textContent=waiveCnt+'单';
+  if(se('stat-profit')) se('stat-profit').textContent='¥'+profit;
+
+  renderPeakChart(paid);
+  renderTopItems(paid);
+}
+
+function renderPeakChart(paid){
+  const el = document.getElementById('peak-chart');
+  if(!el) return;
+  const hours = Array(24).fill(0);
+  paid.forEach(o=>hours[o.time.getHours()]++);
+  const displayed = [17,18,19,20,21,22,23];
+  const max = Math.max(1,...displayed.map(h=>hours[h]));
+  el.innerHTML = displayed.map(h=>{
+    const cnt = hours[h];
+    const h_px = Math.max(4, Math.round((cnt/max)*68));
+    return `<div class="bar-col">
+      <div class="bar${cnt===Math.max(...displayed.map(h=>hours[h]))?' peak':''}" style="height:${h_px}px"></div>
+      <div class="bar-lbl">${h}时</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTopItems(paid){
+  const el = document.getElementById('stats-top-items');
+  if(!el) return;
+  const counts = {};
+  paid.forEach(o=>o.lines.forEach(l=>{
+    counts[l.name]=(counts[l.name]||0)+l.qty;
+    l.toppings&&l.toppings.forEach(t=>{counts[t.name]=(counts[t.name]||0)+t.qty;});
+  }));
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxCnt = sorted[0]?sorted[0][1]:1;
+  const ranks=['gold','silver','bronze','','','','','','',''];
+  const nums=['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+  el.innerHTML = sorted.length===0
+    ? '<div style="font-size:11px;color:#bbb;padding:8px 0">暂无数据</div>'
+    : sorted.map((r,i)=>`<div class="top-row">
+        <div class="rank ${ranks[i]}">${nums[i]}</div>
+        <div class="top-name">${r[0]}</div>
+        <div class="top-bar-w"><div class="top-bar-f" style="width:${Math.round(r[1]/maxCnt*100)}%"></div></div>
+        <div class="top-cnt">${r[1]}份</div>
+      </div>`).join('');
+}
+
+function openTopAll(){
+  const paid = getFilteredOrders();
+  const counts = {};
+  paid.forEach(o=>o.lines.forEach(l=>{
+    counts[l.name]=(counts[l.name]||0)+l.qty;
+    l.toppings&&l.toppings.forEach(t=>{counts[t.name]=(counts[t.name]||0)+t.qty;});
+  }));
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const maxCnt = sorted[0]?sorted[0][1]:1;
+  document.getElementById('top-all-content').innerHTML = sorted.length===0
+    ? '<div style="font-size:12px;color:#bbb;padding:16px 0">暂无销售数据</div>'
+    : sorted.map((r,i)=>`<div class="top-row">
+        <div class="rank ${i<3?['gold','silver','bronze'][i]:''}">${i+1}</div>
+        <div class="top-name">${r[0]}</div>
+        <div class="top-bar-w"><div class="top-bar-f" style="width:${Math.round(r[1]/maxCnt*100)}%"></div></div>
+        <div class="top-cnt">${r[1]}份</div>
+      </div>`).join('');
+  openSheet('top-all-ov');
+}
+
+/* ── STAT DETAIL DRILL-DOWN ── */
+function openStatDetail(type){
+  const paid = getFilteredOrders();
+  const titles={revenue:'营业额明细',cash:'现金明细',digital:'微信/支付宝明细',waive:'免单明细',profit:'利润估算说明'};
+  document.getElementById('stat-detail-title').textContent = titles[type]||'明细';
+  let rows=[];
+  if(type==='revenue') rows=paid.filter(o=>o.payMethod!=='waive');
+  else if(type==='cash') rows=paid.filter(o=>o.payMethod==='cash');
+  else if(type==='digital') rows=paid.filter(o=>['alipay','wechat'].includes(o.payMethod));
+  else if(type==='waive') rows=paid.filter(o=>o.payMethod==='waive');
+  else if(type==='profit'){
+    const rev=paid.filter(o=>o.payMethod!=='waive').reduce((s,o)=>s+o.total,0);
+    document.getElementById('stat-detail-content').innerHTML=`
+      <div class="detail-row"><span class="detail-lbl">营业额</span><span class="detail-val">¥${rev}</span></div>
+      <div class="detail-row"><span class="detail-lbl">预估成本（55%）</span><span class="detail-val">¥${Math.round(rev*0.55)}</span></div>
+      <div class="detail-row"><span class="detail-lbl">预估利润（45%）</span><span class="detail-val" style="color:var(--green)">¥${Math.round(rev*0.45)}</span></div>
+      <div style="font-size:10px;color:#bbb;margin-top:12px;line-height:1.7">* 成本率55%为估算值，实际利润以真实食材成本为准</div>`;
+    openSheet('stat-detail-ov');
+    return;
+  }
+  if(rows.length===0){
+    document.getElementById('stat-detail-content').innerHTML='<div style="color:#bbb;font-size:12px;padding:16px 0">暂无数据</div>';
+  } else {
+    const mtd={cash:'现金',alipay:'支付宝',wechat:'微信',waive:'免单'};
+    document.getElementById('stat-detail-content').innerHTML=rows.map(o=>`
+      <div class="detail-row">
+        <div class="detail-lbl">
+          #${o.displayNum}
+          <span class="detail-tag" style="background:${o.payMethod==='waive'?'#FFF3E0':'var(--green-light)'};color:${o.payMethod==='waive'?'var(--orange)':'var(--green)'}">
+            ${mtd[o.payMethod]||''}${o.waiveReason?'·'+o.waiveReason:''}
+          </span>
+          <div style="font-size:9px;color:#bbb">${o.time.toLocaleTimeString('zh')} · ${o.lines.map(l=>l.name).join('、')}</div>
+        </div>
+        <div class="detail-val" style="font-size:14px">${o.payMethod!=='waive'?'¥'+o.total:'—'}</div>
+      </div>`).join('');
+  }
+  openSheet('stat-detail-ov');
+}
+
+/* ══════════════════════════════════════════════
+   CSV DOWNLOAD
+══════════════════════════════════════════════ */
+function downloadCSV(){
+  const paid = orders.filter(o=>o.status==='paid');
+  if(paid.length===0){showToast('⚠️ 暂无已完成订单数据');return;}
+  const rows=[['分店ID','分店名','分支','营业日','日期时间','完整订单号','取餐号','支付方式','免单理由','主菜名','主菜数量','主菜单价','主菜金额','配料名','配料数量','配料单价','配料金额','备注规格']];
+  paid.forEach(o=>{
+    o.lines.forEach(l=>{
+      if(l.toppings&&l.toppings.length){
+        l.toppings.forEach(t=>{
+          rows.push([
+            o.storeId,o.storeName,o.branch,o.bizDay,
+            o.time.toISOString(),o.fullId,o.displayNum,
+            o.payMethod,o.waiveReason||'',
+            l.name,l.qty,l.unitPrice,l.lineTotal,
+            t.name,t.qty,t.unitPrice,t.unitPrice*t.qty,
+            l.spec.replace(/\n/g,' ')
+          ]);
+        });
+      } else {
+        rows.push([
+          o.storeId,o.storeName,o.branch,o.bizDay,
+          o.time.toISOString(),o.fullId,o.displayNum,
+          o.payMethod,o.waiveReason||'',
+          l.name,l.qty,l.unitPrice,l.lineTotal,
+          '','','','',
+          l.spec.replace(/\n/g,' ')
+        ]);
+      }
+    });
+  });
+  const csv=rows.map(r=>r.map(v=>'"'+(String(v||'').replace(/"/g,'""'))+'"').join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`小谢螺蛳粉_销售数据_${fmtDate(new Date())}.csv`;
+  a.click();
+  showToast('✅ 数据导出成功！');
+}
+
+/* ══════════════════════════════════════════════
+   PRINT
+══════════════════════════════════════════════ */
+function triggerPrint(order, isReprint=false){
+  order.printed=true;
+  document.getElementById('pn-text').textContent=isReprint?`重新打印 #${order.displayNum}`:`新订单 #${order.displayNum} · 正在打印`;
+  document.getElementById('pn-sub').textContent=order.lines.map(l=>l.name+'×'+l.qty).join('、');
+  const n=document.getElementById('print-notif');
+  const f=document.getElementById('pn-fill');
+  n.classList.add('show'); f.style.width='0';
+  setTimeout(()=>{f.style.width='100%';},80);
+  setTimeout(()=>{n.classList.remove('show');},3800);
+}
+
+/* ══════════════════════════════════════════════
+   MENU MANAGEMENT
+══════════════════════════════════════════════ */
+function renderMenuManage(){
+  const el=document.getElementById('menu-manage-list');
+  if(!el)return;
+  const itemsHtml=DB.cats().map(c=>{
+    const its=[...DB.items.filter(i=>i.cat===c)].sort((a,b)=>b.on-a.on);
+    return `<div>
+      <div class="mg-sec-title">${DB.CE[c]} ${DB.CL[c]}</div>
+      ${its.map(item=>`
+        <div class="mg-item" style="${!item.on?'opacity:0.5':''}">
+          <div><div class="mg-name">${item.name}</div><div class="mg-price">¥${item.price}</div></div>
+          <div class="mg-actions">
+            <div class="tog${item.on?' on':''}" onclick="toggleOn(${item.id},this)"><div class="tog-knob"></div></div>
+            <button class="ebtn edit" onclick="openEdit(${item.id},false,'item')">编辑</button>
+            <button class="ebtn del" onclick="delItem(${item.id})">删除</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+  const sortedTops=[...DB.toppings].sort((a,b)=>b.on-a.on);
+  const topsHtml=`<div>
+    <div class="mg-sec-title" style="display:flex;justify-content:space-between;align-items:center;padding-right:13px">
+      <span>🥩 螺蛳粉配料</span>
+      <button onclick="openEdit(-1,true,'topping')" style="background:var(--orange);color:#fff;border:none;border-radius:5px;padding:2px 8px;font-size:9px;font-weight:600;cursor:pointer">+配料</button>
+    </div>
+    ${sortedTops.map(t=>`
+      <div class="mg-item" style="${!t.on?'opacity:0.5':''}">
+        <div><div class="mg-name">${t.name}</div><div class="mg-price">+¥${t.price}${!t.on?' · 估清':''}</div></div>
+        <div class="mg-actions">
+          <div class="tog${t.on?' on':''}" onclick="toggleTopOn('${t.id}',this)"><div class="tog-knob"></div></div>
+          <button class="ebtn edit" onclick="openEdit('${t.id}',false,'topping')">编辑</button>
+          <button class="ebtn del" onclick="delTopping('${t.id}')">删除</button>
+        </div>
+      </div>`).join('')}
+  </div>`;
+  el.innerHTML=itemsHtml+topsHtml;
+}
+
+function toggleOn(id,el){
+  const item=DB.items.find(i=>i.id===id);
+  item.on=!item.on; el.classList.toggle('on',item.on);
+  renderCustomerMenu(); renderCombo();
+  showToast(item.on?`✅ ${item.name} 已上架`:`⏸ ${item.name} 已下架`);
+}
+function toggleTopOn(tid,el){
+  const top=DB.toppings.find(t=>t.id===tid);
+  top.on=!top.on; renderMenuManage(); renderToppings();
+  showToast(top.on?`✅ ${top.name} 已上架`:`⏸ ${top.name} 估清`);
+}
+
+let editingId=null, editingType='item';
+function openEdit(id,isNew,type='item'){
+  editingId=isNew?null:id; editingType=type;
+  const isTop=(type==='topping');
+  document.getElementById('edit-title').textContent=isNew?(isTop?'添加配料':'添加菜品'):(isTop?'编辑配料':'编辑菜品');
+  document.getElementById('edit-cat-row').style.display=isTop?'none':'block';
+  if(isNew){
+    document.getElementById('edit-name').value='';
+    document.getElementById('edit-price').value='';
+    document.getElementById('edit-cat').value='noodles';
+    document.getElementById('edit-tog').className='tog on';
+  } else if(isTop){
+    const top=DB.toppings.find(t=>t.id===id);
+    document.getElementById('edit-name').value=top.name;
+    document.getElementById('edit-price').value=top.price;
+    document.getElementById('edit-tog').className='tog'+(top.on?' on':'');
+  } else {
+    const item=DB.items.find(i=>i.id===id);
+    document.getElementById('edit-name').value=item.name;
+    document.getElementById('edit-price').value=item.price;
+    document.getElementById('edit-cat').value=item.cat;
+    document.getElementById('edit-tog').className='tog'+(item.on?' on':'');
+  }
+  document.getElementById('edit-ov').classList.add('show');
+}
+function closeEdit(){document.getElementById('edit-ov').classList.remove('show');}
+function maybeCloseEdit(e){if(e.target.id==='edit-ov')closeEdit();}
+function saveEdit(){
+  const name=document.getElementById('edit-name').value.trim();
+  const price=parseFloat(document.getElementById('edit-price').value);
+  const cat=document.getElementById('edit-cat').value;
+  const on=document.getElementById('edit-tog').classList.contains('on');
+  if(!name||isNaN(price)){showToast('⚠️ 请填写名称和价格');return;}
+  if(editingType==='topping'){
+    if(editingId===null) DB.toppings.push({id:DB.nextTopId(),name,price,on});
+    else Object.assign(DB.toppings.find(t=>t.id===editingId),{name,price,on});
+  } else {
+    if(editingId===null) DB.items.push({id:DB.nextId(),cat,name,desc:'',price,on,hot:false});
+    else Object.assign(DB.items.find(i=>i.id===editingId),{name,price,cat,on});
+  }
+  closeEdit(); renderAll();
+  showToast(editingId===null?'✅ 已添加':'✅ 已更新');
+}
+function delItem(id){
+  const item=DB.items.find(i=>i.id===id);
+  if(!item)return;
+  DB.items.splice(DB.items.indexOf(item),1);
+  renderAll(); showToast(`🗑 「${item.name}」已删除`);
+}
+function delTopping(tid){
+  const top=DB.toppings.find(t=>t.id===tid);
+  if(!top)return;
+  DB.toppings.splice(DB.toppings.indexOf(top),1);
+  renderAll(); showToast(`🗑 「${top.name}」已删除`);
+}
+
+/* ══════════════════════════════════════════════
+   NAV
+══════════════════════════════════════════════ */
+function showTab(v, btn){
+  ['menu','order','merchant'].forEach(x=>document.getElementById('view-'+x).style.display='none');
+  document.getElementById('view-'+v).style.display='flex';
+  if(btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  if(v==='merchant') updateBizDayLabel();
+}
+function switchCat(el,catId){
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  document.querySelectorAll('[id^="ccat-"]').forEach(d=>d.style.display='none');
+  document.getElementById(catId).style.display='block';
+}
+function mNav(btn,id){
+  document.querySelectorAll('.m-nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  ['m-orders','m-stats','m-menu'].forEach(i=>{
+    const el=document.getElementById(i);
+    if(el) el.style.display='none';
+  });
+  document.getElementById(id).style.display='flex';
+  document.getElementById(id).style.flexDirection='column';
+  if(id==='m-stats') renderStats();
+}
+
+/* ── SHEET HELPERS ── */
+function openSheet(id){ document.getElementById(id).classList.add('show'); }
+function closeSheet(id){ document.getElementById(id).classList.remove('show'); }
+function maybeClose(e, id){ if(e.target.id===id) closeSheet(id); }
+
+/* ── TOAST ── */
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.transform='translateX(-50%) translateY(0)';
+  setTimeout(()=>{t.style.transform='translateX(-50%) translateY(90px)';},3000);
+}
+
+/* ══ INIT ══ */
+renderAll();
+// hide date filter initially (active tab is showing)
+document.getElementById('order-date-filter').style.display='none';
+</script>
+</body>
+</html>
